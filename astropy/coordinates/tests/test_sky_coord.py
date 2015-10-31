@@ -132,9 +132,25 @@ def test_coord_init_string():
     assert allclose(sc1.ra, Angle(120 * u.deg))
     assert allclose(sc1.dec, Angle(5 * u.deg))
 
-    with pytest.raises(ValueError) as err:
-        SkyCoord('8 00 -5 00 00.0', unit=(u.hour, u.deg), frame='icrs')
-    assert 'coordinates have 5 values but spherical representation only accepts 3' in str(err)
+    sc2 = SkyCoord('8 00 -5 00 00.0', unit=(u.hour, u.deg), frame='icrs')
+    assert isinstance(sc2, SkyCoord)
+    assert allclose(sc2.ra, Angle(120 * u.deg))
+    assert allclose(sc2.dec, Angle(-5 * u.deg))
+
+    sc3 = SkyCoord('8 00 -5 00.6', unit=(u.hour, u.deg), frame='icrs')
+    assert isinstance(sc3, SkyCoord)
+    assert allclose(sc3.ra, Angle(120 * u.deg))
+    assert allclose(sc3.dec, Angle(-5.01 * u.deg))
+
+    sc4 = SkyCoord('J080000.0-050036.0', unit=(u.hour, u.deg), frame='icrs')
+    assert isinstance(sc4, SkyCoord)
+    assert allclose(sc4.ra, Angle(120 * u.deg))
+    assert allclose(sc4.dec, Angle(-5.01 * u.deg))
+
+    sc5 = SkyCoord('8h 00.6m -5d 00.6m', unit=(u.hour, u.deg), frame='icrs')
+    assert isinstance(sc5, SkyCoord)
+    assert allclose(sc5.ra, Angle(120.15 * u.deg))
+    assert allclose(sc5.dec, Angle(-5.01 * u.deg))
 
 
 def test_coord_init_unit():

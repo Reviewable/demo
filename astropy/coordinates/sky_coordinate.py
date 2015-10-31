@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import collections
 
 import numpy as np
+import re
 
 from ..utils.compat.misc import override__dir__
 from ..extern import six
@@ -17,6 +18,9 @@ from .representation import (BaseRepresentation, SphericalRepresentation,
                              UnitSphericalRepresentation)
 
 __all__ = ['SkyCoord']
+
+PMRE = re.compile(r'(\+|\-)')
+JPMRE = re.compile(r'J([0-9]{6}\.?[0-9]{0,2})([\+\-][0-9]{6}\.?[0-9]{0,2})\s*$')
 
 
 # Define a convenience mapping.  This is used like a module constants
@@ -915,8 +919,21 @@ def _parse_coordinate_arg(coords, frame, units):
             if isinstance(coord, six.string_types):
                 coord1 = coord.split()
                 if len(coord1) == 6:
-                    coord1 = (' '.join(coord1[:3]), ' '.join(coord1[3:]))
-                coord = coord1
+                    coord = (' '.join(coord1[:3]), ' '.join(coord1[3:]))
+                elif len(coord1) > 2:
+                    coord = PMRE.split(coord)
+                    coord = (coord[0], ' '.join(coord[1:]))
+                elif len(coord1) == 1:
+                        try:
+                            coord = JPMRE.match(coord).groups()
+                            coord = ('{0} {1} {2}'.
+                                     format(coord[0][0:2], coord[0][2:4], coord[0][4:]),
+                                     '{0} {1} {2}'.
+                                     format(coord[1][0:3], coord[1][3:5], coord[1][5:]))
+                        except:
+                            coord = coord1
+                else:
+                    coord = coord1
 
             vals.append(coord)  # This assumes coord is a sequence at this point
 
